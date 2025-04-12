@@ -141,7 +141,7 @@ public class ATMGUI extends JFrame implements ActionListener {
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (account_number, pin, name, balance) VALUES (?, ?, ?, 0)");
             stmt.setString(1, acc);
             stmt.setString(2, pin);
-            stmt.setString(3, name); // 🆕 store name
+            stmt.setString(3, name); //  store name
             stmt.executeUpdate();
             outputArea.setText("Account registered successfully!");
             return true;
@@ -159,7 +159,7 @@ public class ATMGUI extends JFrame implements ActionListener {
 
         if (e.getSource() == loginBtn) {
             if (authenticate(acc, pin)) {
-                outputArea.setText("Welcome, " + userName + "! 🎉\nLogin successful.");
+                outputArea.setText("Welcome, " + userName + "! \nLogin successful.");
                 enableButtons();
             } else {
                 outputArea.setText("Invalid credentials.");
