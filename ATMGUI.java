@@ -1,17 +1,16 @@
-import javax.swing.*;      
-import java.awt.event.*;  
-import java.sql.*;         
+import javax.swing.*;
+import java.awt.event.*;
+import java.sql.*;
 
-
-public class ATMGUI extends JFrame implements ActionListener { 
+public class ATMGUI extends JFrame implements ActionListener {
     private JTextField accField, nameField, amountField;
     private JPasswordField pinField;
-    private JButton loginBtn, registerBtn, checkBalanceBtn, depositBtn, withdrawBtn;
+    private JButton loginBtn, registerBtn, checkBalanceBtn, depositBtn, withdrawBtn, logoutBtn;
     private JTextArea outputArea;
 
     private double balance;
     private String accNo;
-    private String userName; 
+    private String userName;
     private Connection conn;
 
     public ATMGUI() {
@@ -29,11 +28,11 @@ public class ATMGUI extends JFrame implements ActionListener {
         accField.setBounds(140, 30, 300, 30);
         add(accField);
 
-        JLabel nameLabel = new JLabel("Name:"); // 🆕
+        JLabel nameLabel = new JLabel("Name:");
         nameLabel.setBounds(30, 70, 100, 30);
         add(nameLabel);
 
-        nameField = new JTextField(); // 🆕
+        nameField = new JTextField();
         nameField.setBounds(140, 70, 300, 30);
         add(nameField);
 
@@ -87,6 +86,12 @@ public class ATMGUI extends JFrame implements ActionListener {
         outputArea.setEditable(false);
         add(outputArea);
 
+        logoutBtn = new JButton("Logout");
+        logoutBtn.setBounds(380, 30, 80, 30);
+        logoutBtn.addActionListener(this);
+        logoutBtn.setEnabled(false);
+        add(logoutBtn);
+
         connectToDatabase();
     }
 
@@ -109,7 +114,7 @@ public class ATMGUI extends JFrame implements ActionListener {
             if (rs.next()) {
                 balance = rs.getDouble("balance");
                 accNo = acc;
-                userName = rs.getString("name"); // 🆕 fetch name
+                userName = rs.getString("name");
                 return true;
             }
         } catch (SQLException e) {
@@ -142,7 +147,7 @@ public class ATMGUI extends JFrame implements ActionListener {
             PreparedStatement stmt = conn.prepareStatement("INSERT INTO users (account_number, pin, name, balance) VALUES (?, ?, ?, 0)");
             stmt.setString(1, acc);
             stmt.setString(2, pin);
-            stmt.setString(3, name); //  store name
+            stmt.setString(3, name);
             stmt.executeUpdate();
             outputArea.setText("Account registered successfully!");
             return true;
@@ -160,8 +165,9 @@ public class ATMGUI extends JFrame implements ActionListener {
 
         if (e.getSource() == loginBtn) {
             if (authenticate(acc, pin)) {
-                outputArea.setText("Welcome, " + userName + "! \nLogin successful.");
+                outputArea.setText("Welcome, " + userName + "!\nLogin successful.");
                 enableButtons();
+                logoutBtn.setEnabled(true); // Enable logout button after login
             } else {
                 outputArea.setText("Invalid credentials.");
             }
@@ -172,28 +178,40 @@ public class ATMGUI extends JFrame implements ActionListener {
                 registerUser(acc, pin, name);
             }
         } else if (e.getSource() == checkBalanceBtn) {
-            outputArea.setText("Hello " + userName + ",\nYour balance is: ₹" + balance);
+            outputArea.setText("Hello " + userName + ",\nYour balance is: Rs. " + balance);
         } else if (e.getSource() == depositBtn) {
             try {
                 double amount = Double.parseDouble(amountField.getText());
-                if (amount < 0) throw new Exception("Cannot deposit negative amount.");
+                if (amount <= 0) throw new Exception("Enter a positive amount.");
                 balance += amount;
                 updateBalanceInDB();
-                outputArea.setText("₹" + amount + " deposited.\nCurrent Balance: ₹" + balance);
+                outputArea.setText("Rs. " + amount + " deposited.\nCurrent Balance: Rs. " + balance);
             } catch (Exception ex) {
                 outputArea.setText("Invalid amount: " + ex.getMessage());
             }
         } else if (e.getSource() == withdrawBtn) {
             try {
                 double amount = Double.parseDouble(amountField.getText());
-                if (amount < 0) throw new Exception("Invalid withdrawal amount.");
+                if (amount <= 0) throw new Exception("Invalid withdrawal amount.");
                 if (amount > balance) throw new Exception("Insufficient balance.");
                 balance -= amount;
                 updateBalanceInDB();
-                outputArea.setText("₹" + amount + " withdrawn.\nCurrent Balance: ₹" + balance);
+                outputArea.setText("Rs. " + amount + " withdrawn.\nCurrent Balance: Rs. " + balance);
             } catch (Exception ex) {
                 outputArea.setText("Transaction failed: " + ex.getMessage());
             }
+        } else if (e.getSource() == logoutBtn) {
+            // Log out the user and reset everything
+            accField.setText("");
+            nameField.setText("");
+            pinField.setText("");
+            amountField.setText("");
+            outputArea.setText("");
+            balance = 0;
+            accNo = "";
+            userName = "";
+            disableButtons();
+            logoutBtn.setEnabled(false); // Disable logout button after logout
         }
     }
 
@@ -202,6 +220,13 @@ public class ATMGUI extends JFrame implements ActionListener {
         checkBalanceBtn.setEnabled(true);
         depositBtn.setEnabled(true);
         withdrawBtn.setEnabled(true);
+    }
+
+    private void disableButtons() {
+        amountField.setEnabled(false);
+        checkBalanceBtn.setEnabled(false);
+        depositBtn.setEnabled(false);
+        withdrawBtn.setEnabled(false);
     }
 
     public static void main(String[] args) {
