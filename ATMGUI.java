@@ -99,6 +99,7 @@ public class ATMGUI extends JFrame implements ActionListener {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/atm_db", "root", "root");
+            conn.setAutoCommit(true); // ✅ Ensure all changes are immediately committed
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Database connection failed: " + e.getMessage());
         }
