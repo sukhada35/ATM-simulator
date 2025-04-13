@@ -1,8 +1,9 @@
-import javax.swing.*;
-import java.awt.event.*;
-import java.sql.*;
+import javax.swing.*;      
+import java.awt.event.*;  
+import java.sql.*;         
 
-public class ATMGUI extends JFrame implements ActionListener {
+
+public class ATMGUI extends JFrame implements ActionListener { 
     private JTextField accField, nameField, amountField;
     private JPasswordField pinField;
     private JButton loginBtn, registerBtn, checkBalanceBtn, depositBtn, withdrawBtn;
@@ -10,7 +11,7 @@ public class ATMGUI extends JFrame implements ActionListener {
 
     private double balance;
     private String accNo;
-    private String userName; // 🆕 to store user's name
+    private String userName; 
     private Connection conn;
 
     public ATMGUI() {
